@@ -88,6 +88,54 @@ export const QUIZZES = [
     answer: 2,
     explanation: "Dünya'nın kendi ekseni etrafında dönmesi, ekvator çevresinde hafif bir şişkinliğe ve kutuplarda basıklığa yol açar.",
     source: "NASA Earth Observatory"
+  },
+  {
+    id:"q-011", category:"Uzay", type:"visual",
+    question:"Bu görseldeki gezegen hangisidir?",
+    imageUrl:"https://commons.wikimedia.org/wiki/Special:FilePath/Saturn.png",
+    options:["Mars","Satürn","Venüs","Neptün"], answer:1,
+    explanation:"Halkalarıyla kolayca tanınan bu gezegen Satürn'dür.",
+    source:"NASA / Wikimedia Commons"
+  },
+  {
+    id:"q-012", category:"Hayvanlar", type:"visual",
+    question:"Bu canlı aşağıdakilerden hangisidir?",
+    imageUrl:"https://commons.wikimedia.org/wiki/Special:FilePath/Octopus2.jpg",
+    options:["Ahtapot","Mürekkep balığı","Denizanası","Deniz yıldızı"], answer:0,
+    explanation:"Ahtapotların üç kalbi ve sekiz kolu bulunur.",
+    source:"Smithsonian Ocean / Wikimedia Commons"
+  },
+  {
+    id:"q-013", category:"Tarih", type:"visual",
+    question:"Bu ünlü tablonun adı nedir?",
+    imageUrl:"https://commons.wikimedia.org/wiki/Special:FilePath/Mona_Lisa.jpg",
+    options:["İnci Küpeli Kız","Mona Lisa","Yıldızlı Gece","Çığlık"], answer:1,
+    explanation:"Leonardo da Vinci'nin Mona Lisa'sı dünyanın en tanınan tablolarından biridir.",
+    source:"Louvre / Wikimedia Commons"
+  },
+  {
+    id:"q-014", category:"Bilim", type:"audio",
+    question:"Dinle ve cevabı seç: Suyun donma noktası kaç santigrat derecedir?",
+    audioText:"Suyun normal atmosfer basıncındaki donma noktası kaç santigrat derecedir?",
+    options:["0 °C","10 °C","32 °C","100 °C"], answer:0,
+    explanation:"Normal atmosfer basıncında saf su yaklaşık 0 °C'de donar.",
+    source:"NIST"
+  },
+  {
+    id:"q-015", category:"Dünya", type:"audio",
+    question:"Dinle ve cevabı seç: Türkiye'nin başkenti hangi şehirdir?",
+    audioText:"Türkiye'nin başkenti hangi şehirdir?",
+    options:["İstanbul","İzmir","Ankara","Bursa"], answer:2,
+    explanation:"Türkiye'nin başkenti Ankara'dır.",
+    source:"T.C. Cumhurbaşkanlığı"
+  },
+  {
+    id:"q-016", category:"Uzay", type:"audio",
+    question:"Dinle ve cevabı seç: Dünya'nın doğal uydusunun adı nedir?",
+    audioText:"Dünya'nın doğal uydusunun adı nedir?",
+    options:["Europa","Ay","Titan","Phobos"], answer:1,
+    explanation:"Dünya'nın doğal uydusu Ay'dır.",
+    source:"NASA"
   }
 ];
 
