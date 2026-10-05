@@ -23,7 +23,7 @@ const RECIPES={
  "Mitoloji":[["P31","tür"],["P279","üst sınıf"],["P106","rol"]],
  "Doğa":[["P31","tür"],["P2044","rakım"],["P206","sular"]],
  "Yiyecek":[["P279","üst sınıf"],["P17","ülke"],["P361","parçası"]],
- "Mimari":[["P571","oluşturulma tarihi"],["P architect","mimar"]],
+ "Mimari":[["P571","oluşturulma tarihi"],["P84","mimar"]],
  "Keşifler":[["P61","keşfeden"],["P575","keşif tarihi"],["P793","önemli olay"]],
  "Ekonomi":[["P17","ülke"],["P452","sektör"],["P108","işveren"]]
 };
@@ -58,28 +58,34 @@ function makeFact(category,row,propertyLabel){
  let title="",text="";
  if(date && /tarih|başlangıç|ölüm|yayın|oluşturulma|keşif/.test(propertyLabel)){
    title=`${item} hakkında şaşırtıcı bir tarih`;
-   text=`${item}, ${date} yılında ${propertyLabel} ile ilişkilidir.`;
+   text=`${item}, ${date} yılında ${propertyLabel} ile ilişkilidir. Bu bilgi Wikidata üzerindeki yapılandırılmış veriden alınmıştır.`;
  }else{
    title=`${item} ile ilgili bunu biliyor muydun?`;
-   text=`${item} için Wikidata'daki ${propertyLabel} bilgisi: ${value}.`;
+   text=`${item} hakkında dikkat çekici bilgi: Wikidata'da ${propertyLabel} olarak ${value} bilgisi yer alıyor.`;
  }
  return {id:`wd-fact-${id}-${propertyLabel.replace(/\\W+/g,"-")}`,category,title,text,source:"Wikidata · yapılandırılmış veri",sourceUrl:`https://www.wikidata.org/wiki/${id}`,license:"CC0",entity:id,tags:[category.toLocaleLowerCase("tr-TR"),propertyLabel]};
 }
 
 async function buildCategory(category){
- const seen=new Set(),out=[];
- for(const [prop,label] of RECIPES[category]){
-   if(out.length>=PER_CATEGORY)break;
-   if(!/^P\d+$/.test(prop))continue;
-   for(let offset=0;offset<5000 && out.length<PER_CATEGORY;offset+=250){
-     const q=`SELECT ?item ?itemLabel ?value ?valueLabel WHERE { ?item wdt:${prop} ?value . ?item rdfs:label ?itemLabel . FILTER(LANG(?itemLabel)="tr") OPTIONAL { ?value rdfs:label ?valueLabel . FILTER(LANG(?valueLabel)="tr") } SERVICE wikibase:label { bd:serviceParam wikibase:language "tr,en". } } LIMIT 250 OFFSET ${offset}`;
-     const rows=await query(q);
-     if(!rows.length)break;
-     for(const row of rows){const f=makeFact(category,row,label);if(f&&!seen.has(f.id)){seen.add(f.id);out.push(f);if(out.length>=PER_CATEGORY)break}}
-     await new Promise(x=>setTimeout(x,350));
-   }
- }
- return out;
+  const seen=new Set(),out=[];
+  const recipes=RECIPES[category];
+  const values=recipes.map(([prop,label])=>`{ ?item wdt:${prop} ?value . BIND("${prop}" AS ?prop) BIND("${label}" AS ?propertyLabel) }`).join(" UNION ");
+  const q=`SELECT ?item ?itemLabel ?value ?valueLabel ?prop ?propertyLabel WHERE {
+    { ${values} }
+    ?item rdfs:label ?itemLabel .
+    FILTER(LANG(?itemLabel)="tr")
+    OPTIONAL { ?value rdfs:label ?valueLabel . FILTER(LANG(?valueLabel)="tr") }
+    FILTER(BOUND(?valueLabel) || DATATYPE(?value)=xsd:dateTime || DATATYPE(?value)=xsd:date || DATATYPE(?value)=xsd:decimal || DATATYPE(?value)=xsd:integer)
+    SERVICE wikibase:label { bd:serviceParam wikibase:language "tr,en". }
+  } LIMIT ${Math.max(PER_CATEGORY*3,750)}`;
+  const rows=await query(q);
+  for(const row of rows){
+    if(out.length>=PER_CATEGORY)break;
+    const label=row.propertyLabel?.value||"özelliği";
+    const f=makeFact(category,row,label);
+    if(f&&!seen.has(f.id)){seen.add(f.id);out.push(f)}
+  }
+  return out;
 }
 
 await fs.mkdir(OUT,{recursive:true});
