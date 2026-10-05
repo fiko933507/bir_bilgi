@@ -30,7 +30,7 @@ Bilgiler `src/data/facts.js` içinde tutuluyor. İleride bu yapı bir API/verita
 
 ## Yol haritası
 
-- [ ] 1000+ doğrulanmış bilgi
+- [x] 1000+ doğrulanmış bilgi
 - [ ] Günlük bildirim
 - [ ] Kaynak gösterimi
 - [ ] Bilgi detay ekranı
