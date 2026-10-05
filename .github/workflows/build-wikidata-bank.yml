@@ -1,0 +1,39 @@
+name: Build Wikidata question bank
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Questions per category"
+        required: false
+        default: "600"
+  schedule:
+    - cron: "17 3 * * 0"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build bank
+        env:
+          WIKIDATA_TARGET_PER_CATEGORY: ${{ inputs.target || '600' }}
+        run: node scripts/build-wikidata-question-bank.mjs
+      - name: Commit generated bank
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/wikidata
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "data: refresh Wikidata Turkish question bank"
+            git push
+          fi
