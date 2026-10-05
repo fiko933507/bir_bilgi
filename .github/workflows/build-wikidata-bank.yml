@@ -1,6 +1,10 @@
 name: Build Wikidata question bank
 
 on:
+  push:
+    paths:
+      - 'scripts/build-wikidata-question-bank.mjs'
+      - '.github/workflows/build-wikidata-bank.yml'
   workflow_dispatch:
     inputs:
       target:
