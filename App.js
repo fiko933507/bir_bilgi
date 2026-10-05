@@ -1,172 +1,25 @@
-import React, { useMemo, useState } from "react";
-import {
-  SafeAreaView,
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  ScrollView,
-  TextInput,
-  StatusBar,
-} from "react-native";
-import { FACTS, CATEGORIES } from "./src/data/facts";
-
-const pickRandom = (items, currentId) => {
-  const pool = items.filter((item) => item.id !== currentId);
-  return pool[Math.floor(Math.random() * pool.length)] || items[0];
-};
-
-export default function App() {
-  const [current, setCurrent] = useState(FACTS[0]);
-  const [category, setCategory] = useState("Tümü");
-  const [search, setSearch] = useState("");
-  const [favorites, setFavorites] = useState([]);
-  const [seen, setSeen] = useState([FACTS[0].id]);
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLocaleLowerCase("tr-TR");
-    return FACTS.filter((fact) => {
-      const categoryOk = category === "Tümü" || fact.category === category;
-      const searchOk =
-        !q ||
-        fact.title.toLocaleLowerCase("tr-TR").includes(q) ||
-        fact.text.toLocaleLowerCase("tr-TR").includes(q) ||
-        fact.category.toLocaleLowerCase("tr-TR").includes(q);
-      return categoryOk && searchOk;
-    });
-  }, [category, search]);
-
-  const nextFact = () => {
-    const source = filtered.length ? filtered : FACTS;
-    const next = pickRandom(source, current.id);
-    setCurrent(next);
-    setSeen((old) => (old.includes(next.id) ? old : [...old, next.id]));
-  };
-
-  const toggleFavorite = () => {
-    setFavorites((old) =>
-      old.includes(current.id)
-        ? old.filter((id) => id !== current.id)
-        : [...old, current.id]
-    );
-  };
-
-  const isFavorite = favorites.includes(current.id);
-
-  return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" />
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.logo}>bir_bilgi</Text>
-            <Text style={styles.subtitle}>Bugün ne öğreneceksin?</Text>
-          </View>
-          <View style={styles.counter}>
-            <Text style={styles.counterNumber}>{seen.length}</Text>
-            <Text style={styles.counterLabel}>keşfedildi</Text>
-          </View>
-        </View>
-
-        <TextInput
-          value={search}
-          onChangeText={setSearch}
-          placeholder="Bilgi ara..."
-          placeholderTextColor="#8f8ba7"
-          style={styles.search}
-        />
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categories}>
-          {["Tümü", ...CATEGORIES].map((item) => (
-            <Pressable
-              key={item}
-              onPress={() => setCategory(item)}
-              style={[styles.chip, category === item && styles.chipActive]}
-            >
-              <Text style={[styles.chipText, category === item && styles.chipTextActive]}>
-                {item}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-
-        <View style={styles.card}>
-          <View style={styles.cardTop}>
-            <Text style={styles.badge}>✨ {current.category}</Text>
-            <Pressable onPress={toggleFavorite} hitSlop={12}>
-              <Text style={styles.heart}>{isFavorite ? "♥" : "♡"}</Text>
-            </Pressable>
-          </View>
-
-          <Text style={styles.eyebrow}>BUNU BİLİYOR MUYDUN?</Text>
-          <Text style={styles.title}>{current.title}</Text>
-          <Text style={styles.fact}>{current.text}</Text>
-
-          <View style={styles.sourceBox}>
-            <Text style={styles.sourceLabel}>KAYNAK</Text>
-            <Text style={styles.source}>{current.source}</Text>
-          </View>
-        </View>
-
-        <Pressable onPress={nextFact} style={styles.button}>
-          <Text style={styles.buttonText}>🎲 Yeni bir bilgi keşfet</Text>
-        </Pressable>
-
-        <Text style={styles.sectionTitle}>Bilgi evreni</Text>
-        <View style={styles.stats}>
-          <View style={styles.stat}>
-            <Text style={styles.statNumber}>{FACTS.length}</Text>
-            <Text style={styles.statText}>örnek bilgi</Text>
-          </View>
-          <View style={styles.stat}>
-            <Text style={styles.statNumber}>{CATEGORIES.length}</Text>
-            <Text style={styles.statText}>kategori</Text>
-          </View>
-          <View style={styles.stat}>
-            <Text style={styles.statNumber}>∞</Text>
-            <Text style={styles.statText}>hedef</Text>
-          </View>
-        </View>
-
-        <Text style={styles.footer}>
-          Bu sadece başlangıç. Bilgi havuzu büyüdükçe uygulama gerçekten sınırsız bir keşif alanına dönüşecek.
-        </Text>
-      </ScrollView>
-    </SafeAreaView>
-  );
+import React,{useMemo,useState} from "react";
+import {SafeAreaView,View,Text,Pressable,StyleSheet,ScrollView,TextInput,StatusBar} from "react-native";
+import {FACTS,CATEGORIES} from "./src/data/facts";
+import {QUIZZES,QUIZ_SIZE} from "./src/data/quizzes";
+const random=(a,id)=>{const p=a.filter(x=>x.id!==id);return p[Math.floor(Math.random()*p.length)]||a[0]};
+const shuffle=a=>[...a].sort(()=>Math.random()-.5);
+export default function App(){
+ const [current,setCurrent]=useState(FACTS[0]),[category,setCategory]=useState("Tümü"),[search,setSearch]=useState(""),[favorites,setFavorites]=useState([]),[seen,setSeen]=useState([FACTS[0].id]);
+ const [screen,setScreen]=useState("home"),[questions,setQuestions]=useState([]),[qi,setQi]=useState(0),[score,setScore]=useState(0),[selected,setSelected]=useState(null),[finished,setFinished]=useState(false);
+ const filtered=useMemo(()=>{const q=search.trim().toLocaleLowerCase("tr-TR");return FACTS.filter(f=>(category==="Tümü"||f.category===category)&&(!q||f.title.toLocaleLowerCase("tr-TR").includes(q)||f.text.toLocaleLowerCase("tr-TR").includes(q)||f.category.toLocaleLowerCase("tr-TR").includes(q)))},[category,search]);
+ const nextFact=()=>{const n=random(filtered.length?filtered:FACTS,current.id);setCurrent(n);setSeen(x=>x.includes(n.id)?x:[...x,n.id])};
+ const startQuiz=()=>{setQuestions(shuffle(QUIZZES).slice(0,QUIZ_SIZE));setQi(0);setScore(0);setSelected(null);setFinished(false);setScreen("quiz")};
+ const answer=i=>{if(selected!==null)return;setSelected(i);if(i===questions[qi].answer)setScore(x=>x+1)};
+ const next=()=>{if(qi===questions.length-1)setFinished(true);else{setQi(x=>x+1);setSelected(null)}};
+ const home=()=>{setScreen("home");setFinished(false);setSelected(null)};
+ if(screen==="quiz"){
+  if(finished){const pct=Math.round(score/questions.length*100);return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.result}><Text style={s.big}>🏆</Text><Text style={s.resultTitle}>Quiz tamamlandı!</Text><Text style={s.resultScore}>{score}/{questions.length}</Text><Text style={s.muted}>{pct}% başarı</Text><View style={s.xp}><Text style={s.xpNum}>+{score*20+20} XP</Text><Text style={s.muted}>Öğrenmeye devam ettiğin için kazandın</Text></View><Text style={s.message}>{pct===100?"Mükemmel! Bilgi evrenini fethettin. 🌟":pct>=60?"Çok iyi! Birkaç yeni bilgi daha cebine girdi. 🚀":"Sorun değil! Yanlışlar da yeni bilgiye dönüşür. 🧠"}</Text><Pressable onPress={startQuiz} style={s.button}><Text style={s.buttonText}>🔄 Tekrar oyna</Text></Pressable><Pressable onPress={home} style={s.secondary}><Text style={s.secondaryText}>← Bilgilere dön</Text></Pressable></ScrollView></SafeAreaView>}
+  const q=questions[qi];if(!q)return null;const answered=selected!==null;
+  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.quiz}><View style={s.quizHead}><Pressable onPress={home} style={s.back}><Text style={s.backText}>←</Text></Pressable><View style={s.progress}><Text style={s.progressText}>SORU {qi+1} / {questions.length}</Text><View style={s.track}><View style={[s.fill,{width:`${(qi+1)/questions.length*100}%`}]}/></View></View><Text style={s.score}>⭐ {score}</Text></View><View style={s.quizCard}><Text style={s.badge}>✨ {q.category}</Text><Text style={s.quizLabel}>BİL BAKALIM</Text><Text style={s.question}>{q.question}</Text><View style={s.options}>{q.options.map((o,i)=>{const correct=i===q.answer,wrong=selected===i&&!correct;return <Pressable key={o} onPress={()=>answer(i)} style={[s.option,answered&&correct&&s.correct,wrong&&s.wrong]}><View style={s.letter}><Text style={s.letterText}>{String.fromCharCode(65+i)}</Text></View><Text style={s.optionText}>{o}</Text>{answered&&correct?<Text>✓</Text>:null}{wrong?<Text>✕</Text>:null}</Pressable>})}</View>{answered?<View style={s.explain}><Text style={s.explainTitle}>{selected===q.answer?"🎉 Doğru cevap!":"💡 Buradan bir bilgi kazandın!"}</Text><Text style={s.explainText}>{q.explanation}</Text><Text style={s.source}>Kaynak: {q.source}</Text></View>:null}</View>{answered?<Pressable onPress={next} style={s.button}><Text style={s.buttonText}>{qi===questions.length-1?"🏁 Sonucu gör":"Devam et →"}</Text></Pressable>:null}</ScrollView></SafeAreaView>
+ }
+ return <SafeAreaView style={s.safe}><StatusBar barStyle="light-content"/><ScrollView contentContainerStyle={s.container}><View style={s.header}><View><Text style={s.logo}>bir_bilgi</Text><Text style={s.subtitle}>Bugün ne öğreneceksin?</Text></View><View style={s.counter}><Text style={s.counterNum}>{seen.length}</Text><Text style={s.counterLabel}>keşfedildi</Text></View></View><TextInput value={search} onChangeText={setSearch} placeholder="Bilgi ara..." placeholderTextColor="#8f8ba7" style={s.search}/><ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.categories}>{["Tümü",...CATEGORIES].map(x=><Pressable key={x} onPress={()=>setCategory(x)} style={[s.chip,category===x&&s.active]}><Text style={[s.chipText,category===x&&s.activeText]}>{x}</Text></Pressable>)}</ScrollView><Pressable onPress={startQuiz} style={s.quizBanner}><Text style={s.quizIcon}>🧠</Text><View style={{flex:1}}><Text style={s.quizEyebrow}>GÜNÜN MİNİ QUIZİ</Text><Text style={s.quizTitle}>Bil Bakalım</Text><Text style={s.quizSub}>5 soru · yanlış cevap bile bilgi kazandırır</Text></View><Text style={s.arrow}>→</Text></Pressable><View style={s.card}><View style={s.cardTop}><Text style={s.badge}>✨ {current.category}</Text><Pressable onPress={()=>setFavorites(x=>x.includes(current.id)?x.filter(id=>id!==current.id):[...x,current.id])}><Text style={s.heart}>{favorites.includes(current.id)?"♥":"♡"}</Text></Pressable></View><Text style={s.eyebrow}>BUNU BİLİYOR MUYDUN?</Text><Text style={s.title}>{current.title}</Text><Text style={s.fact}>{current.text}</Text><View style={s.sourceBox}><Text style={s.sourceLabel}>KAYNAK</Text><Text style={s.source}>{current.source}</Text></View></View><Pressable onPress={nextFact} style={s.button}><Text style={s.buttonText}>🎲 Yeni bir bilgi keşfet</Text></Pressable><Text style={s.section}>Bilgi evreni</Text><View style={s.stats}><View style={s.stat}><Text style={s.statNum}>{FACTS.length}</Text><Text style={s.statText}>örnek bilgi</Text></View><View style={s.stat}><Text style={s.statNum}>{CATEGORIES.length}</Text><Text style={s.statText}>kategori</Text></View><View style={s.stat}><Text style={s.statNum}>∞</Text><Text style={s.statText}>hedef</Text></View></View><Text style={s.footer}>Bu sadece başlangıç. Bilgi havuzu büyüdükçe uygulama gerçekten sınırsız bir keşif alanına dönüşecek.</Text></ScrollView></SafeAreaView>
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#0d0b1d" },
-  container: { padding: 20, paddingBottom: 40 },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 22 },
-  logo: { color: "#fff", fontSize: 30, fontWeight: "900", letterSpacing: -1 },
-  subtitle: { color: "#aaa6c4", marginTop: 3, fontSize: 14 },
-  counter: { backgroundColor: "#1b1730", borderRadius: 16, paddingHorizontal: 13, paddingVertical: 9, alignItems: "center" },
-  counterNumber: { color: "#c7b8ff", fontSize: 20, fontWeight: "800" },
-  counterLabel: { color: "#77728e", fontSize: 10 },
-  search: { backgroundColor: "#17132a", color: "#fff", borderWidth: 1, borderColor: "#2b2644", borderRadius: 14, paddingHorizontal: 16, paddingVertical: 13, fontSize: 15, marginBottom: 13 },
-  categories: { marginBottom: 18 },
-  chip: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, backgroundColor: "#17132a", marginRight: 8, borderWidth: 1, borderColor: "#28233f" },
-  chipActive: { backgroundColor: "#7561d9", borderColor: "#7561d9" },
-  chipText: { color: "#aaa6c4", fontSize: 12, fontWeight: "700" },
-  chipTextActive: { color: "#fff" },
-  card: { backgroundColor: "#f7f4ff", borderRadius: 28, padding: 22, minHeight: 360, marginBottom: 15 },
-  cardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  badge: { color: "#6652c5", fontWeight: "800", fontSize: 12 },
-  heart: { color: "#6652c5", fontSize: 30 },
-  eyebrow: { color: "#9b91b7", fontSize: 10, fontWeight: "900", letterSpacing: 1.5, marginTop: 42 },
-  title: { color: "#19142b", fontSize: 28, lineHeight: 34, fontWeight: "900", marginTop: 9 },
-  fact: { color: "#48415d", fontSize: 17, lineHeight: 26, marginTop: 16 },
-  sourceBox: { borderTopWidth: 1, borderTopColor: "#e4dff0", marginTop: 26, paddingTop: 14 },
-  sourceLabel: { color: "#9b91b7", fontSize: 9, fontWeight: "900" },
-  source: { color: "#6e6680", fontSize: 11, marginTop: 3 },
-  button: { backgroundColor: "#7561d9", borderRadius: 16, paddingVertical: 16, alignItems: "center", marginBottom: 28 },
-  buttonText: { color: "#fff", fontWeight: "900", fontSize: 15 },
-  sectionTitle: { color: "#fff", fontSize: 18, fontWeight: "900", marginBottom: 12 },
-  stats: { flexDirection: "row", gap: 10 },
-  stat: { flex: 1, backgroundColor: "#17132a", borderRadius: 17, padding: 15 },
-  statNumber: { color: "#c7b8ff", fontSize: 22, fontWeight: "900" },
-  statText: { color: "#77728e", fontSize: 11, marginTop: 4 },
-  footer: { color: "#6e6980", textAlign: "center", fontSize: 11, lineHeight: 17, marginTop: 25 }
+const s=StyleSheet.create({
+ safe:{flex:1,backgroundColor:"#0d0b1d"},container:{padding:20,paddingBottom:40},header:{flexDirection:"row",justifyContent:"space-between",alignItems:"center",marginBottom:22},logo:{color:"#fff",fontSize:30,fontWeight:"900"},subtitle:{color:"#aaa6c4",marginTop:3,fontSize:14},counter:{backgroundColor:"#1b1730",borderRadius:16,padding:10,alignItems:"center"},counterNum:{color:"#c7b8ff",fontSize:20,fontWeight:"800"},counterLabel:{color:"#77728e",fontSize:10},search:{backgroundColor:"#17132a",color:"#fff",borderWidth:1,borderColor:"#2b2644",borderRadius:14,paddingHorizontal:16,paddingVertical:13,fontSize:15,marginBottom:13},categories:{marginBottom:18},chip:{paddingHorizontal:14,paddingVertical:9,borderRadius:20,backgroundColor:"#17132a",marginRight:8,borderWidth:1,borderColor:"#28233f"},active:{backgroundColor:"#7561d9",borderColor:"#7561d9"},chipText:{color:"#aaa6c4",fontSize:12,fontWeight:"700"},activeText:{color:"#fff"},quizBanner:{backgroundColor:"#221b40",borderRadius:22,padding:15,flexDirection:"row",alignItems:"center",marginBottom:15,borderWidth:1,borderColor:"#40356c"},quizIcon:{fontSize:27,backgroundColor:"#7561d9",padding:10,borderRadius:15,marginRight:12},quizEyebrow:{color:"#a99bea",fontSize:9,fontWeight:"900"},quizTitle:{color:"#fff",fontSize:20,fontWeight:"900",marginTop:2},quizSub:{color:"#aaa1c8",fontSize:11,marginTop:3},arrow:{color:"#c7b8ff",fontSize:25},card:{backgroundColor:"#f7f4ff",borderRadius:28,padding:22,minHeight:360,marginBottom:15},cardTop:{flexDirection:"row",justifyContent:"space-between"},badge:{color:"#6652c5",fontWeight:"800",fontSize:12},heart:{color:"#6652c5",fontSize:30},eyebrow:{color:"#9b91b7",fontSize:10,fontWeight:"900",marginTop:42},title:{color:"#19142b",fontSize:28,lineHeight:34,fontWeight:"900",marginTop:9},fact:{color:"#48415d",fontSize:17,lineHeight:26,marginTop:16},sourceBox:{borderTopWidth:1,borderTopColor:"#e4dff0",marginTop:26,paddingTop:14},sourceLabel:{color:"#9b91b7",fontSize:9,fontWeight:"900"},source:{color:"#6e6680",fontSize:11,marginTop:3},button:{backgroundColor:"#7561d9",borderRadius:16,paddingVertical:16,alignItems:"center",marginBottom:14},buttonText:{color:"#fff",fontWeight:"900",fontSize:15},section:{color:"#fff",fontSize:18,fontWeight:"900",marginBottom:12},stats:{flexDirection:"row",gap:10},stat:{flex:1,backgroundColor:"#17132a",borderRadius:17,padding:15},statNum:{color:"#c7b8ff",fontSize:22,fontWeight:"900"},statText:{color:"#77728e",fontSize:11,marginTop:4},footer:{color:"#6e6980",textAlign:"center",fontSize:11,lineHeight:17,marginTop:25},quiz:{padding:20,paddingBottom:40},quizHead:{flexDirection:"row",alignItems:"center",marginBottom:18,gap:10},back:{width:42,height:42,borderRadius:14,backgroundColor:"#17132a",alignItems:"center",justifyContent:"center"},backText:{color:"#fff",fontSize:24},progress:{flex:1},progressText:{color:"#aaa6c4",fontSize:10,fontWeight:"900",marginBottom:7},track:{height:6,borderRadius:4,backgroundColor:"#27213d",overflow:"hidden"},fill:{height:6,backgroundColor:"#7561d9"},score:{backgroundColor:"#221b40",color:"#c7b8ff",padding:9,borderRadius:13,fontWeight:"900"},quizCard:{backgroundColor:"#f7f4ff",borderRadius:28,padding:20,marginBottom:15},quizLabel:{color:"#9b91b7",fontSize:9,fontWeight:"900",marginTop:22},question:{color:"#19142b",fontSize:24,lineHeight:31,fontWeight:"900",marginTop:7,marginBottom:20},options:{gap:10},option:{minHeight:58,borderRadius:16,borderWidth:1,borderColor:"#ddd7eb",backgroundColor:"#fff",flexDirection:"row",alignItems:"center",padding:10},correct:{backgroundColor:"#e8f8ed",borderColor:"#75bd8b"},wrong:{backgroundColor:"#fff0f0",borderColor:"#db8585"},letter:{width:36,height:36,borderRadius:11,backgroundColor:"#eee9f8",alignItems:"center",justifyContent:"center",marginRight:10},letterText:{color:"#6652c5",fontWeight:"900"},optionText:{color:"#302a42",fontSize:14,fontWeight:"700",flex:1},explain:{backgroundColor:"#f2efff",borderRadius:16,padding:14,marginTop:16},explainTitle:{color:"#302a42",fontSize:13,fontWeight:"900"},explainText:{color:"#514a62",fontSize:13,lineHeight:19,marginTop:6},big:{fontSize:60,textAlign:"center"},result:{padding:24,justifyContent:"center",flexGrow:1},resultTitle:{color:"#fff",fontSize:28,fontWeight:"900",textAlign:"center"},resultScore:{color:"#c7b8ff",fontSize:58,fontWeight:"900",textAlign:"center",marginTop:18},muted:{color:"#aaa6c4",fontSize:14,textAlign:"center"},xp:{backgroundColor:"#17132a",borderRadius:18,padding:18,alignItems:"center",marginVertical:22},xpNum:{color:"#c7b8ff",fontSize:26,fontWeight:"900"},message:{color:"#d7d2e5",fontSize:15,lineHeight:23,textAlign:"center",marginBottom:24},secondary:{backgroundColor:"#17132a",borderRadius:16,paddingVertical:15,alignItems:"center"},secondaryText:{color:"#c7b8ff",fontWeight:"800"}
 });
