@@ -3,7 +3,7 @@ import {View,Text,Pressable,StyleSheet,Animated,Easing} from "react-native";
 
 const SEGMENTS=[
  {name:"Tarih",icon:"🏛️"},{name:"Bilim",icon:"🔬"},{name:"Uzay",icon:"🌌"},{name:"Hayvanlar",icon:"🐾"},
- {name:"Dünya",icon:"🌍"},{name:"Teknoloji",icon:"💻"},{name:"İnsan",icon:"🧠"},{name:"Sürpriz",icon:"🎲"}
+ {name:"Dünya",icon:"🌍"},{name:"Teknoloji",icon:"💻"},{name:"İnsan",icon:"🧠"},{name:"Sürpriz",icon:"🎲"},{name:"Efsane",icon:"🏆",legendary:true}
 ];
 
 export default function WheelGame({onSelected,onBack}){
@@ -15,7 +15,7 @@ export default function WheelGame({onSelected,onBack}){
   const target=360*6+(360-(index*segment+segment/2));
   setSpinning(true);setResult(null);
   Animated.timing(rotation,{toValue:target,duration:4200,easing:Easing.out(Easing.cubic),useNativeDriver:true}).start(({finished})=>{
-   if(finished){setResult(SEGMENTS[index]);setSpinning(false);setTimeout(()=>onSelected(SEGMENTS[index].name),650);}
+   if(finished){setResult(SEGMENTS[index]);setSpinning(false);setTimeout(()=>onSelected(SEGMENTS[index].name,!!SEGMENTS[index].legendary),650);}
   });
  };
  const spinStyle={transform:[{rotate:rotation.interpolate({inputRange:[0,360],outputRange:["0deg","360deg"]})}]};
@@ -28,7 +28,7 @@ export default function WheelGame({onSelected,onBack}){
     <View style={w.center}><Text style={w.centerIcon}>?</Text></View>
    </Animated.View>
   </View>
-  {result?<View style={w.result}><Text style={w.resultSmall}>ÇARK DURDU!</Text><Text style={w.resultTitle}>{result.icon} {result.name}</Text><Text style={w.resultText}>{result.name==="Sürpriz"?"Her kategoriden sürpriz bir soru hazırlanıyor.":"Bu kategoriden şansına özel bir soru geliyor."}</Text></View>:<Text style={w.hint}>{spinning?"Dönüyor...":"Çarkı çevir ve şansını dene!"}</Text>}
+  {result?<View style={w.result}><Text style={w.resultSmall}>{result.legendary?"🏆 EFSANEVİ DİLİM!":"ÇARK DURDU!"}</Text><Text style={w.resultTitle}>{result.icon} {result.name}</Text><Text style={w.resultText}>{result.legendary?"Bu turda +100 XP değerinde zor bir soru geliyor!":result.name==="Sürpriz"?"Her kategoriden sürpriz bir soru hazırlanıyor.":"Bu kategoriden şansına özel bir soru geliyor."}</Text></View>:<Text style={w.hint}>{spinning?"Dönüyor...":"Çarkı çevir ve şansını dene!"}</Text>}
   <Pressable disabled={spinning} onPress={spin} style={[w.button,spinning&&w.disabled]}><Text style={w.buttonText}>{spinning?"🎡 Çark dönüyor...":"🎡 ÇARKI ÇEVİR"}</Text></Pressable>
   <Text style={w.note}>Her dönüşte soru havuzundan farklı bir soru seçilebilir. Bazı sorular görsel veya sesli olabilir.</Text>
  </View>
@@ -43,5 +43,5 @@ const w=StyleSheet.create({
  icon:{fontSize:24},slotText:{color:"#fff",fontSize:10,fontWeight:"900",marginTop:4},center:{width:72,height:72,borderRadius:36,backgroundColor:"#f7f4ff",alignItems:"center",justifyContent:"center",borderWidth:5,borderColor:"#c7b8ff"},
  centerIcon:{color:"#6652c5",fontSize:30,fontWeight:"900"},hint:{color:"#aaa6c4",textAlign:"center",fontSize:14,marginBottom:15},result:{backgroundColor:"#221b40",borderWidth:1,borderColor:"#40356c",borderRadius:20,padding:14,alignItems:"center",marginBottom:14},
  resultSmall:{color:"#a99bea",fontSize:9,fontWeight:"900"},resultTitle:{color:"#fff",fontSize:24,fontWeight:"900",marginTop:3},resultText:{color:"#aaa6c4",fontSize:11,marginTop:4,textAlign:"center"},
- button:{backgroundColor:"#7561d9",borderRadius:16,paddingVertical:17,alignItems:"center"},disabled:{opacity:.65},buttonText:{color:"#fff",fontWeight:"900",fontSize:15},note:{color:"#6e6980",fontSize:10,lineHeight:16,textAlign:"center",marginTop:16}
+ button:{backgroundColor:"#7561d9",borderRadius:16,paddingVertical:17,alignItems:"center"},disabled:{opacity:.65},buttonText:{color:"#fff",fontWeight:"900",fontSize:15},legendary:{color:"#ffd86b",fontSize:11,fontWeight:"900"},note:{color:"#6e6980",fontSize:10,lineHeight:16,textAlign:"center",marginTop:16}
 });
