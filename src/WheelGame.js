@@ -2,8 +2,7 @@ import React,{useRef,useState} from "react";
 import {View,Text,Pressable,StyleSheet,Animated,Easing} from "react-native";
 
 const SEGMENTS=[
- {name:"Tarih",icon:"🏛️"},{name:"Bilim",icon:"🔬"},{name:"Uzay",icon:"🌌"},{name:"Hayvanlar",icon:"🐾"},
- {name:"Dünya",icon:"🌍"},{name:"Teknoloji",icon:"💻"},{name:"İnsan",icon:"🧠"},{name:"Sürpriz",icon:"🎲"},{name:"Efsane",icon:"🏆",legendary:true}
+ {name:"Tarih",icon:"🏛️"},{name:"Bilim",icon:"🔬"},{name:"Uzay",icon:"🌌"},{name:"Hayvanlar",icon:"🐾"},{name:"Sanat",icon:"🎨"},{name:"Spor",icon:"🏅"},{name:"Edebiyat",icon:"📚"},{name:"Sinema",icon:"🎬"},{name:"Müzik",icon:"🎵"},{name:"Coğrafya",icon:"🗺️"},{name:"Mitoloji",icon:"🐉"},{name:"Dünya",icon:"🌍"},{name:"Teknoloji",icon:"💻"},{name:"İnsan",icon:"🧠"},{name:"Sürpriz",icon:"🎲"},{name:"Efsane",icon:"🏆",legendary:true}
 ];
 
 export default function WheelGame({onSelected,onBack}){
@@ -24,7 +23,7 @@ export default function WheelGame({onSelected,onBack}){
   <View style={w.stage}>
    <View style={w.pointer}><Text style={w.pointerText}>▼</Text></View>
    <Animated.View style={[w.wheel,spinStyle]}>
-    {SEGMENTS.map((x,i)=><View key={x.name} style={[w.slot,{transform:[{rotate:`${i*45}deg`},{translateY:-118}]}]}><View style={w.slotInner}><Text style={w.icon}>{x.icon}</Text><Text style={w.slotText}>{x.name}</Text></View></View>)}
+    {SEGMENTS.map((x,i)=><View key={x.name} style={[w.slot,{transform:[{rotate:`${i*(360/SEGMENTS.length)}deg`},{translateY:-118}]}]}><View style={w.slotInner}><Text style={w.icon}>{x.icon}</Text><Text style={w.slotText}>{x.name}</Text></View></View>)}
     <View style={w.center}><Text style={w.centerIcon}>?</Text></View>
    </Animated.View>
   </View>
