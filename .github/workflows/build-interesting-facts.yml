@@ -1,0 +1,46 @@
+name: Build interesting fact bank
+
+on:
+  push:
+    paths:
+      - 'scripts/build-interesting-facts.mjs'
+      - '.github/workflows/build-interesting-facts.yml'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Interesting facts per category"
+        required: false
+        default: "500"
+  schedule:
+    - cron: "47 3 * * 0"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build interesting facts
+        env:
+          INTERESTING_FACTS_PER_CATEGORY: ${{ inputs.target || '500' }}
+        run: node scripts/build-interesting-facts.mjs
+      - name: Validate counts
+        run: |
+          node -e "const fs=require('fs');const m=JSON.parse(fs.readFileSync('src/data/interesting-facts/manifest.json'));console.log(JSON.stringify(m,null,2));if(m.total < 10000) process.exit(1);"
+      - name: Commit generated bank
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/interesting-facts
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "data: build 10000+ interesting facts"
+            git push
+          fi
