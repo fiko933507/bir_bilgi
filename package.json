@@ -8,7 +8,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build:wikidata": "node scripts/build-wikidata-question-bank.mjs"
+    "build:wikidata": "node scripts/build-wikidata-question-bank.mjs",
+    "build:interesting": "node scripts/build-interesting-facts.mjs"
   },
   "dependencies": {
     "expo": "~54.0.0",
