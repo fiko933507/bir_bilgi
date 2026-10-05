@@ -44,7 +44,7 @@ Bilgiler `src/data/facts.js` içinde tutuluyor. İleride bu yapı bir API/verita
 
 Uygulama artık MMLU-TR katmanına ek olarak **Wikidata yapılandırılmış verilerinden üretilen bağımsız Türkçe sorular** için ikinci bir veri katmanına hazırdır. Üretici varsayılan olarak 17 kategoride kategori başına 600 soru hedefler (**10.200 soru**). Sorular kategori bazlı JSON dosyalarına ayrılır ve uygulama bunları gerektiğinde uzaktan yükler.
 
-Wikidata'nın yapılandırılmış verileri CC0 kapsamında yeniden kullanılabilir; ayrıca uygulama içinde kaynak olarak Wikidata gösterilir. citeturn1search0turn1search1
+Wikidata'nın yapılandırılmış verileri CC0 kapsamında yeniden kullanılabilir; ayrıca uygulama içinde kaynak olarak Wikidata gösterilir.
 
 Üretim: `npm run build:wikidata`
 
